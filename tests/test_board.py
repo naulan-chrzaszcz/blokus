@@ -15,7 +15,9 @@ class BoardTest(unittest.TestCase):
 
     def test_is_piece_overlapping_at(self) -> None:
         piece = Piece(tuple([(0, 0)]))
-        self.board.put(piece, Colors.BLUE, 2, 2)
+        piece.color = Colors.BLUE
+
+        self.board.put(piece, 2, 2)
         # Needed to call 'save' method to have 'backup' 
         # variable used in the 'is_piece_overlapping_at' method
         self.board.save()
@@ -36,7 +38,9 @@ class BoardTest(unittest.TestCase):
 
     def test_can_place_piece_at(self) -> None:
         piece = Piece(tuple([(0, 0)]))
-        self.board.put(piece, Colors.BLUE, 2, 2)
+        piece.color = Colors.BLUE
+        
+        self.board.put(piece, 2, 2)
         # Needed to call 'save' method to have 'backup' 
         # variable used in the 'can_place_piece_at' method
         self.board.save()

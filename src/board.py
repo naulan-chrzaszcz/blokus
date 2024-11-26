@@ -6,14 +6,7 @@ from .colors import Colors
 
 
 class Board:
-    """Represents the game board where pieces are placed.
-
-    Attributes:
-        board (np.ndarray): 2D NumPy array representing the current state of the board.
-        backup (np.ndarray): Backup of the board's state for undo functionality.
-        width (int): Width of the board.
-        height (int): Height of the board.
-    """
+    """Represents the game board where pieces are placed."""
     board: np.ndarray
     # Save of the board for specific context
     backup: np.ndarray
@@ -31,7 +24,7 @@ class Board:
         self.height = height
         self.board = np.array([[0 for _ in range(width)] for _ in range(height)])
 
-    def put(self, piece: Piece, color: Colors, x: int, y: int) -> None:
+    def put(self, piece: Piece, x: int, y: int) -> None:
         """Places a piece on the board at the specified coordinates.
 
         The piece will be represented with its designated color. 
@@ -45,7 +38,7 @@ class Board:
             y (int): Vertical coordinate where the piece will be placed.
         """
         for x_piece, y_piece in piece.iterate_data():
-            self.board[y_piece + y, x_piece + x] = 1 * color.value
+            self.board[y_piece + y, x_piece + x] = 1 * piece.color.value
 
     def get(self) -> np.ndarray:
         """Returns the current state of the board.
@@ -123,33 +116,61 @@ class Board:
             OutOfBoardException: When the piece coordinate is out of the board
         """
         for cell_x, cell_y in piece.iterate_data():
-            if x_offset < 0 or y_offset < 0 or x_offset >= self.width or y_offset >= self.height:
+            cell_x += x_offset
+            cell_y += y_offset
+            if cell_x < 0 or cell_y < 0 or cell_x >= self.width or cell_y >= self.height:
                 raise OutOfBoardException()
 
-            cell_x += x_offset
-            cell_y += y_offset            
             if self.is_piece_overlapping_at(piece, x_offset, y_offset):
                 raise PieceOverlapException()
 
-            # Define the coordinates of the adjacent squares to check
-            left = cell_x - 1
-            right = cell_x + 1
-            top = cell_y - 1
-            bottom = cell_y + 1
+        top_left = piece.top_left
+        top_right = piece.top_right
+        bottom_left = piece.bottom_left
+        bottom_right = piece.bottom_right
 
-            # TODO: Les coins sont mal detecté, faut s'assuré que la partie qu'on verifie est bien l'extremité de la piece
-            if not (
-                top >= 0 and (
-                    (right < self.width and self.board[top, right] != 0) 
-                    or (left >= 0 and self.board[top, left] != 0)
-                ) or (
-                    bottom < self.height and (
-                        (right < self.width and self.board[bottom, right] != 0)
-                        or (left >= 0 and self.board[bottom, left] != 0)
-                    )
-                )
-            ):
+        top_from = lambda tupl: (tupl[1] - 1) + y_offset
+        right_from = lambda tupl: (tupl[0] + 1) + x_offset
+        bottom_from = lambda tupl: (tupl[1] + 1) + y_offset
+        left_from = lambda tupl: (tupl[0] - 1) + x_offset
+
+        # TODO: Améliorer la lisibilité des conditions de detection de coins des pieces.
+        if (top_from(top_left) >= 0 and left_from(top_left) >= 0
+            and self.board[top_from(top_left), left_from(top_left)] == piece.color.value):
+
+            if self.board[top_from(top_left), piece.top_left[0] + x_offset] == piece.color.value:
                 raise NotAdjacentPieceException()
+            if self.board[piece.top_left[1] + y_offset, left_from(top_left)] == piece.color.value:
+                raise NotAdjacentPieceException()
+            return
+
+        if (top_from(top_right) >= 0 and right_from(top_right) < self.width
+            and self.board[top_from(top_right), right_from(top_right)] == piece.color.value):
+
+            if self.board[top_from(top_right), piece.top_right[0] + x_offset] == piece.color.value:
+                raise NotAdjacentPieceException()
+            if self.board[piece.top_right[1] + y_offset, right_from(top_right)] == piece.color.value:
+                raise NotAdjacentPieceException()
+            return
+
+        if (bottom_from(bottom_left) < self.height and left_from(bottom_left) >= 0
+            and self.board[bottom_from(bottom_left), left_from(bottom_left)] == piece.color.value):
+
+            if self.board[bottom_from(bottom_left), piece.bottom_left[0] + x_offset] == piece.color.value:
+                raise NotAdjacentPieceException()
+            if self.board[piece.bottom_left[1] + y_offset, left_from(bottom_left)] == piece.color.value:
+                raise NotAdjacentPieceException()
+            return
+
+        if (bottom_from(bottom_right) < self.height and right_from(bottom_right) < self.width
+              and self.board[bottom_from(bottom_right), right_from(bottom_right)] == piece.color.value):
+            
+            if self.board[bottom_from(bottom_right), piece.bottom_left[0] + x_offset] == piece.color.value:
+                raise NotAdjacentPieceException()
+            if self.board[piece.bottom_left[1] + y_offset, right_from(bottom_right)] == piece.color.value:
+                raise NotAdjacentPieceException()
+            return
+        raise NotAdjacentPieceException()
 
     def display(self) -> None:
         """Displays the current state of the board in the terminal.

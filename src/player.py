@@ -13,8 +13,6 @@ class Player:
     to place on the game board. The player can retrieve pieces from their deck 
     and place them on the board while adhering to the game's rules.
     """
-    # Color of the player and the piece that will be placed
-    color: Colors
     # Deck contains 21 pieces at the initialization
     deck: List[Piece]
 
@@ -29,8 +27,9 @@ class Player:
             color (Colors): Color of the player and the piece that will be placed
             pieces (List[Piece]): Deck contains 21 pieces at the initialization
         """
-        self.color = color
         self.deck = pieces.copy()
+        for piece in self.deck:
+            piece.color = color
 
     def get_piece(self, i: int) -> Piece:
         """Retrieves a piece from the deck at the specified index.
@@ -72,24 +71,25 @@ class Player:
                                     an existing piece (if applicable).
         """
         if len(self.deck) == 21:
-            if not board.is_piece_in_corner_at(piece, x, y):
-                raise PieceNotInCornerException()
             if board.is_piece_overlapping_at(piece, x, y):
                 raise PieceOverlapException()
-
-        if len(self.deck) < 21:
+            if not board.is_piece_in_corner_at(piece, x, y):
+                raise PieceNotInCornerException()
+        else:
             board.can_place_piece_at(piece, x, y)
-        board.put(piece, self.color, x, y)
+        board.put(piece, x, y)
         self.deck.remove(piece)
 
     def display_deck(self) -> None:
         """Displays the player's deck of pieces in a visual format."""
         # TODO: This code is not really optimized and does a lot of processing
         pieces_to_display = [[[0 for _ in range(Piece.MAX_SIZE)] for _ in range(Piece.MAX_SIZE)] for _ in range(len(self.deck))]
+        color: Colors
 
         i = 0
         while i < len(self.deck):
-            piece = self.deck[i].data            
+            piece = self.deck[i].data
+            color = self.deck[i].color
             for x, y in piece:
                 pieces_to_display[i][y][x] = 1
             i += 1
@@ -99,7 +99,7 @@ class Player:
             for piece_to_display in pieces_to_display:
                 for x in range(Piece.MAX_SIZE):
                     if piece_to_display[y][x] == 1:
-                        line += f"{str(self.color)}■{str(Colors.RESET)}"
+                        line += f"{str(color)}■{str(Colors.RESET)}"
                     else:
                         line += " "
                 line += " | "

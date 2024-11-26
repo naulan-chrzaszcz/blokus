@@ -1,4 +1,3 @@
-import numpy as np
 import random
 import time
 import os
@@ -105,7 +104,7 @@ class Game:
                         self.board.restore()
                         piece.rotate()
                         # Preview
-                        self.board.put(piece, Colors.LIGHT_GRAY, x, y)
+                        self.board.put(piece, x, y)
 
                         self.screen_clear()
                         self.board.display()
@@ -115,7 +114,7 @@ class Game:
                         self.board.restore()
                         piece.mirror(player_input[1] == "h", player_input[1] == "v")
                         # Preview
-                        self.board.put(piece, Colors.LIGHT_GRAY, x, y)
+                        self.board.put(piece, x, y)
                         
                         self.screen_clear()
                         self.board.display()
@@ -133,12 +132,13 @@ class Game:
 
                         self.board.restore()
                         # Preview
-                        self.board.put(piece, Colors.LIGHT_GRAY, x, y)
+                        self.board.put(piece, x, y)
                     except ValueError:
                         print("Invalid number")
                         continue
-                    except Exception:
+                    except Exception as e:
                         print("Unknow error")
+                        print(e)
                         continue
 
                     self.screen_clear()
