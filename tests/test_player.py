@@ -25,32 +25,43 @@ class PlayerTest(unittest.TestCase):
     def test_place_piece(self) -> None:
         player_blue = Player(Colors.BLUE, [Piece(tuple([(0, 0), (1, 0)])) for _ in range(21)])
         board = Board(5, 5)
+
+        # Needed to call 'save' method to have 'backup' 
+        # variable used in the 'can_place_piece_at' method.
         board.save()
+        # Beginning of the game simulation.
         piece = player_blue.get_piece(0)
-
         with self.assertRaises(PieceNotInCornerException):
-            player_blue.place_piece(board, piece, 5, 5)
-
+            player_blue.place_piece(board, piece, 3, 3)
         player_blue.place_piece(board, piece, 0, 0)
         self.assertEqual(20, len(player_blue.deck))
-        piece = player_blue.get_piece(0)
 
+        # Corners detection test
+        piece = player_blue.get_piece(0)
         board.save()
         with self.assertRaises(PieceOverlapException):
             player_blue.place_piece(board, piece, 0, 0)
-
         with self.assertRaises(NotAdjacentPieceException):
             player_blue.place_piece(board, piece, 3, 3)
-
-        board.display()
         player_blue.place_piece(board, piece, 2, 1)
-        
+        self.assertEqual(19, len(player_blue.deck))
+
+        # Verifies whether, in the presence of a piece of a different color, 
+        # the pieces can be attached to each other and if collisions work correctly in this context.
         player_red = Player(Colors.RED, [Piece(tuple([(0, 0), (1, 0)])) for _ in range(21)])
         piece = player_red.get_piece(0)
-        
-        board.restore()
-        
-        piece = player_blue.get_piece(0)
-        player_blue.place_piece(board, piece, 1, 1)
+        board.save()
+        player_red.place_piece(board, piece, 3, 4)
+        self.assertEqual(20, len(player_red.deck))
+
+        piece = player_red.get_piece(0)
+        piece.rotate()
+        board.save()
+        player_red.place_piece(board, piece, 2, 2)
+        self.assertEqual(19, len(player_red.deck))
+
+        piece = player_red.get_piece(0)
+        board.save()
+        player_red.place_piece(board, piece, 0, 1)
+        self.assertEqual(18, len(player_red.deck))
         board.display()
-        
