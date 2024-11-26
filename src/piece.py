@@ -1,5 +1,5 @@
-from typing import Generator, Tuple
-
+from typing import Generator, List, Tuple
+from .colors import Colors
 
 class Piece:
     """Represents a game piece using a set of coordinates.
@@ -7,9 +7,15 @@ class Piece:
     The piece is defined by a tuple of coordinates that represent its cells.
     """
     MAX_SIZE: int = 5
-    data: tuple
+    data: Tuple[Tuple[int, int]]
+    color: Colors
 
-    def __init__(self, data: tuple) -> None:
+    bottom_left = None
+    bottom_right = None
+    top_left = None
+    top_right = None
+
+    def __init__(self, data: Tuple[Tuple[int, int]]) -> None:
         """Create a new Piece
 
         Args:
@@ -17,6 +23,7 @@ class Piece:
                           where each coordinate is a tuple of (x, y).
         """
         self.data = data
+        self.__get_extremities()
 
     def iterate_data(self) -> Generator[Tuple[int, int], None, None]:
         """Yields the coordinates of each cell in the piece.
@@ -38,6 +45,8 @@ class Piece:
         rotated_piece = [((y - cy) + cx, cy - (x - cx)) for x, y in self.data]
         self.data = tuple([(x - min(x for x, _ in rotated_piece),
                             y - min(y for _, y in rotated_piece)) for x, y in rotated_piece])
+        
+        self.__get_extremities()
 
     def mirror(self, horizontal: bool = True, vertical: bool = True) -> None:
         """Mirrors the piece horizontally and/or vertically."""
@@ -61,4 +70,27 @@ class Piece:
 
         self.data = tuple([(x - min(x for x, _ in mirrored_piece),
                             y - min(y for _, y in mirrored_piece)) for x, y in mirrored_piece])
+        
+        self.__get_extremities()
+
+    def __get_extremities(self) -> None:
+        for cell_x, cell_y in self.iterate_data():
+            if (self.data.count((cell_x - 1, cell_y)) == 0
+                and self.data.count((cell_x, cell_y - 1)) == 0):
+                self.top_left = (cell_x, cell_y)
+            if (self.data.count((cell_x, cell_y - 1)) == 0
+                and self.data.count((cell_x + 1, cell_y)) == 0):
+                self.top_right = (cell_x, cell_y)
+            if (self.data.count((cell_x - 1, cell_y)) == 0
+                and self.data.count((cell_x, cell_y + 1)) == 0):
+                self.bottom_left = (cell_x, cell_y)
+            if (self.data.count((cell_x + 1, cell_y)) == 0
+                and self.data.count((cell_x, cell_y + 1)) == 0):
+                self.bottom_right = (cell_x, cell_y)
+
+    def set_color(self, color: Colors) -> None:
+        self.color = color
+    
+    def get_color(self) -> Colors:
+        return self.color
 

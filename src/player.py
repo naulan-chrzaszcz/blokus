@@ -31,6 +31,8 @@ class Player:
         """
         self.color = color
         self.deck = pieces.copy()
+        for piece in self.deck:
+            piece.set_color(color)
 
     def get_piece(self, i: int) -> Piece:
         """Retrieves a piece from the deck at the specified index.
@@ -72,14 +74,13 @@ class Player:
                                     an existing piece (if applicable).
         """
         if len(self.deck) == 21:
-            if not board.is_piece_in_corner_at(piece, x, y):
-                raise PieceNotInCornerException()
             if board.is_piece_overlapping_at(piece, x, y):
                 raise PieceOverlapException()
-
-        if len(self.deck) < 21:
+            if not board.is_piece_in_corner_at(piece, x, y):
+                raise PieceNotInCornerException()
+        else:
             board.can_place_piece_at(piece, x, y)
-        board.put(piece, self.color, x, y)
+        board.put(piece, x, y)
         self.deck.remove(piece)
 
     def display_deck(self) -> None:
