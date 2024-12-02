@@ -1,4 +1,4 @@
-from typing import Generator, Tuple
+from typing import Generator, Tuple, List
 
 from .colors import Colors
 
@@ -11,10 +11,10 @@ class Piece:
     data: Tuple[Tuple[int, int]]
     color: Colors
 
-    bottom_left: Tuple[int, int] | None
-    bottom_right: Tuple[int, int] | None
-    top_left: Tuple[int, int] | None
-    top_right: Tuple[int, int] | None
+    bottom_left: List[Tuple[int, int]]
+    bottom_right: List[Tuple[int, int]]
+    top_left: List[Tuple[int, int]]
+    top_right: List[Tuple[int, int]]
 
     def __init__(self, data: Tuple[Tuple[int, int]]) -> None:
         """Create a new Piece
@@ -24,10 +24,22 @@ class Piece:
                           where each coordinate is a tuple of (x, y).
         """
         self.data = data
+        self.bottom_left = []
+        self.bottom_right = []
+        self.top_left = []
+        self.top_right = []
         self.__get_extremities()
 
     def __copy__(self):
         return Piece(self.data)
+    
+    def __eq__(self, other):
+        if isinstance(other, Piece):
+            if hasattr(self, 'color') and hasattr(other, 'color'):
+                return (self.color == other.color and 
+                        self.data == other.data)
+            return self.data == other.data
+        return False
 
     def iterate_data(self) -> Generator[Tuple[int, int], None, None]:
         """Yields the coordinates of each cell in the piece.
@@ -79,16 +91,21 @@ class Piece:
 
     def __get_extremities(self) -> None:
         """Identifies and assigns the corners of the data structure."""
+        self.top_left.clear()
+        self.top_right.clear()
+        self.bottom_left.clear()
+        self.bottom_right.clear()
+
         for cell_x, cell_y in self.iterate_data():
             if (self.data.count((cell_x - 1, cell_y)) == 0
                 and self.data.count((cell_x, cell_y - 1)) == 0):
-                self.top_left = (cell_x, cell_y)
+                self.top_left.append((cell_x, cell_y))
             if (self.data.count((cell_x, cell_y - 1)) == 0
                 and self.data.count((cell_x + 1, cell_y)) == 0):
-                self.top_right = (cell_x, cell_y)
+                self.top_right.append((cell_x, cell_y))
             if (self.data.count((cell_x - 1, cell_y)) == 0
                 and self.data.count((cell_x, cell_y + 1)) == 0):
-                self.bottom_left = (cell_x, cell_y)
+                self.bottom_left.append((cell_x, cell_y))
             if (self.data.count((cell_x + 1, cell_y)) == 0
                 and self.data.count((cell_x, cell_y + 1)) == 0):
-                self.bottom_right = (cell_x, cell_y)
+                self.bottom_right.append((cell_x, cell_y))
