@@ -1,3 +1,5 @@
+from copy import copy
+
 from typing import List
 
 from .exceptions import PieceNotFoundException, PieceNotInCornerException, PieceOverlapException
@@ -27,7 +29,7 @@ class Player:
             color (Colors): Color of the player and the piece that will be placed
             pieces (List[Piece]): Deck contains 21 pieces at the initialization
         """
-        self.deck = pieces.copy()
+        self.deck = [copy(piece) for piece in pieces]
         for piece in self.deck:
             piece.color = color
 
@@ -84,15 +86,11 @@ class Player:
         """Displays the player's deck of pieces in a visual format."""
         # TODO: This code is not really optimized and does a lot of processing
         pieces_to_display = [[[0 for _ in range(Piece.MAX_SIZE)] for _ in range(Piece.MAX_SIZE)] for _ in range(len(self.deck))]
-        color: Colors
 
-        i = 0
-        while i < len(self.deck):
-            piece = self.deck[i].data
-            color = self.deck[i].color
-            for x, y in piece:
+        color = self.deck[0].color
+        for i, piece in enumerate(self.deck):
+            for x, y in piece.data:
                 pieces_to_display[i][y][x] = 1
-            i += 1
 
         for y in range(Piece.MAX_SIZE):
             line = " | "

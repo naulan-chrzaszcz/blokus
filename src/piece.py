@@ -1,4 +1,5 @@
 from typing import Generator, Tuple
+
 from .colors import Colors
 
 class Piece:
@@ -24,6 +25,9 @@ class Piece:
         """
         self.data = data
         self.__get_extremities()
+
+    def __copy__(self):
+        return Piece(self.data)
 
     def iterate_data(self) -> Generator[Tuple[int, int], None, None]:
         """Yields the coordinates of each cell in the piece.

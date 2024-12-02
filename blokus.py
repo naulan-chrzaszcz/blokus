@@ -81,7 +81,7 @@ class Game:
                 player.display_deck()
 
                 print(f"{str(Colors.RESET)} Quel piece voulez-vous placer > ", end="")
-                piece: Piece
+                piece: Piece | None = None
                 try:
                     piece = player.get_piece(int(input()) - 1)
                 except ValueError:
@@ -90,6 +90,8 @@ class Game:
                 except OutOfBoardException:
                     print("La piece n'existe pas")
                     continue
+                except Exception as e:
+                    print(e)
 
                 self.screen_clear()
                 self.board.display()
@@ -98,8 +100,8 @@ class Game:
                 self.board.save()
                 while player_input != "confirm":
                     print(f"{str(Colors.RESET)} Où voulez-vous la placer > ")
-
                     player_input = input()
+
                     if player_input == "r":
                         self.board.restore()
                         piece.rotate()
@@ -137,7 +139,6 @@ class Game:
                         print("Invalid number")
                         continue
                     except Exception as e:
-                        print("Unknow error")
                         print(e)
                         continue
 
@@ -167,5 +168,5 @@ class Game:
 
 
 game = Game(Board(20, 20))
+game.screen_clear()
 game.run()
-
