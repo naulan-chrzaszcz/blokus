@@ -124,52 +124,51 @@ class Board:
             if self.is_piece_overlapping_at(piece, x_offset, y_offset):
                 raise PieceOverlapException()
 
-        top_left = piece.top_left
-        top_right = piece.top_right
-        bottom_left = piece.bottom_left
-        bottom_right = piece.bottom_right
-
         top_from = lambda tupl: (tupl[1] - 1) + y_offset
         right_from = lambda tupl: (tupl[0] + 1) + x_offset
         bottom_from = lambda tupl: (tupl[1] + 1) + y_offset
         left_from = lambda tupl: (tupl[0] - 1) + x_offset
 
         # TODO: Améliorer la lisibilité des conditions de detection de coins des pieces.
-        if (top_from(top_left) >= 0 and left_from(top_left) >= 0
-            and self.board[top_from(top_left), left_from(top_left)] == piece.color.value):
+        for top_left in piece.top_left:
+            if (top_from(top_left) >= 0 and left_from(top_left) >= 0
+                and self.board[top_from(top_left), left_from(top_left)] == piece.color.value):
 
-            if self.board[top_from(top_left), piece.top_left[0] + x_offset] == piece.color.value:
-                raise NotAdjacentPieceException()
-            if self.board[piece.top_left[1] + y_offset, left_from(top_left)] == piece.color.value:
-                raise NotAdjacentPieceException()
-            return
+                if self.board[top_from(top_left), top_left[0] + x_offset] == piece.color.value:
+                    raise NotAdjacentPieceException()
+                if self.board[top_left[1] + y_offset, left_from(top_left)] == piece.color.value:
+                    raise NotAdjacentPieceException()
+                return
 
-        if (top_from(top_right) >= 0 and right_from(top_right) < self.width
-            and self.board[top_from(top_right), right_from(top_right)] == piece.color.value):
+        for top_right in piece.top_right:
+            if (top_from(top_right) >= 0 and right_from(top_right) < self.width
+                and self.board[top_from(top_right), right_from(top_right)] == piece.color.value):
 
-            if self.board[top_from(top_right), piece.top_right[0] + x_offset] == piece.color.value:
-                raise NotAdjacentPieceException()
-            if self.board[piece.top_right[1] + y_offset, right_from(top_right)] == piece.color.value:
-                raise NotAdjacentPieceException()
-            return
+                if self.board[top_from(top_right), top_right[0] + x_offset] == piece.color.value:
+                    raise NotAdjacentPieceException()
+                if self.board[top_right[1] + y_offset, right_from(top_right)] == piece.color.value:
+                    raise NotAdjacentPieceException()
+                return
 
-        if (bottom_from(bottom_left) < self.height and left_from(bottom_left) >= 0
-            and self.board[bottom_from(bottom_left), left_from(bottom_left)] == piece.color.value):
+        for bottom_left in piece.bottom_left:
+            if (bottom_from(bottom_left) < self.height and left_from(bottom_left) >= 0
+                and self.board[bottom_from(bottom_left), left_from(bottom_left)] == piece.color.value):
 
-            if self.board[bottom_from(bottom_left), piece.bottom_left[0] + x_offset] == piece.color.value:
-                raise NotAdjacentPieceException()
-            if self.board[piece.bottom_left[1] + y_offset, left_from(bottom_left)] == piece.color.value:
-                raise NotAdjacentPieceException()
-            return
+                if self.board[bottom_from(bottom_left), bottom_left[0] + x_offset] == piece.color.value:
+                    raise NotAdjacentPieceException()
+                if self.board[bottom_left[1] + y_offset, left_from(bottom_left)] == piece.color.value:
+                    raise NotAdjacentPieceException()
+                return
 
-        if (bottom_from(bottom_right) < self.height and right_from(bottom_right) < self.width
-              and self.board[bottom_from(bottom_right), right_from(bottom_right)] == piece.color.value):
-            
-            if self.board[bottom_from(bottom_right), piece.bottom_left[0] + x_offset] == piece.color.value:
-                raise NotAdjacentPieceException()
-            if self.board[piece.bottom_left[1] + y_offset, right_from(bottom_right)] == piece.color.value:
-                raise NotAdjacentPieceException()
-            return
+        for bottom_right in piece.bottom_right:
+            if (bottom_from(bottom_right) < self.height and right_from(bottom_right) < self.width
+                and self.board[bottom_from(bottom_right), right_from(bottom_right)] == piece.color.value):
+                
+                if self.board[bottom_from(bottom_right), bottom_left[0] + x_offset] == piece.color.value:
+                    raise NotAdjacentPieceException()
+                if self.board[bottom_left[1] + y_offset, right_from(bottom_right)] == piece.color.value:
+                    raise NotAdjacentPieceException()
+                return
         raise NotAdjacentPieceException()
 
     def display(self) -> None:
