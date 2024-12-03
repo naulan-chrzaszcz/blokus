@@ -78,12 +78,12 @@ class Game:
                 player = self.players[i]
 
                 self.board.display()
-                player.display_deck()
+                player.deck.display()
 
                 print(f"{str(Colors.RESET)} Quel piece voulez-vous placer > ", end="")
                 piece: Piece | None = None
                 try:
-                    piece = player.get_piece(int(input()) - 1)
+                    piece = player.deck.get(int(input()) - 1)
                 except ValueError:
                     print("Choix non valide")
                     continue
