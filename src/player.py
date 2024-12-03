@@ -18,11 +18,7 @@ class Player:
     # Deck contains 21 pieces at the initialization
     deck: List[Piece]
 
-    def __init__(
-        self,
-        color: Colors,
-        pieces: List[Piece],
-    ) -> None:
+    def __init__(self, color: Colors, pieces: List[Piece]) -> None:
         """Create a new Player
 
         Args:

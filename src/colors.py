@@ -61,4 +61,4 @@ class Colors(Enum):
             case self.LIGHT_GRAY.value:
                 return '\033[37m'
             case _:
-                raise Exception(f"The Colors value {self.value} is not referenced in __str__().")
+                raise Exception(f"The Colors value {self.value} is not referenced in `__str__()`.")

@@ -9,7 +9,7 @@ class Board:
     """Represents the game board where pieces are placed."""
     board: np.ndarray
     # Save of the board for specific context
-    backup: np.ndarray
+    backup: np.ndarray | None
     width: int
     height: int
 
@@ -20,9 +20,9 @@ class Board:
             width (int): Width of the board.
             height (int): Height of the board.
         """
+        self.board = np.array([[0 for _ in range(width)] for _ in range(height)])
         self.width = width
         self.height = height
-        self.board = np.array([[0 for _ in range(width)] for _ in range(height)])
 
     def put(self, piece: Piece, x: int, y: int) -> None:
         """Places a piece on the board at the specified coordinates.
@@ -33,12 +33,11 @@ class Board:
 
         Args:
             piece (Piece): Piece to be placed on the board.
-            color (Colors): Color of the piece being placed.
-            x (int): Horizontal coordinate where the piece will be placed.
-            y (int): Vertical coordinate where the piece will be placed.
+            x_offset (int): Horizontal offset for placement.
+            y_offset (int): Vertical offset for placement.
         """
         for x_piece, y_piece in piece.iterate_data():
-            self.board[y_piece + y, x_piece + x] = 1 * piece.color.value
+            self.board[y_piece + y, x_piece + x] = piece.color.value
 
     def get(self) -> np.ndarray:
         """Returns the current state of the board.
@@ -65,20 +64,21 @@ class Board:
 
         Args:
             piece (Piece): Piece to check for corner placement.
-            x (int): x-coordinate where the piece is intended to be placed.
-            y (int): y-coordinate where the piece is intended to be placed.
+            x_offset (int): Horizontal offset for placement.
+            y_offset (int): Vertical offset for placement.
 
         Returns:
             bool: True if at least one part of the piece is in a corner; otherwise, False.
         """
         i = 0
-        while (i < len(piece.data) 
-               and not ((y_offset + piece.data[i][1] == 0 and x_offset + piece.data[i][0] == 0)
-                        or (y_offset + piece.data[i][1] == 0 and x_offset + piece.data[i][0] == (self.width - 1))
-                        or (y_offset + piece.data[i][1] == (self.height - 1) and x_offset + piece.data[i][0] == 0)
-                        or (y_offset + piece.data[i][1] == (self.height - 1) and x_offset + piece.data[i][0] == (self.width - 1)))):
+        data = piece.data
+        while (i < len(data)
+               and not ((y_offset + data[i][1] == 0 and x_offset + data[i][0] == 0)
+                        or (y_offset + data[i][1] == 0 and x_offset + data[i][0] == (self.width - 1))
+                        or (y_offset + data[i][1] == (self.height - 1) and x_offset + data[i][0] == 0)
+                        or (y_offset + data[i][1] == (self.height - 1) and x_offset + data[i][0] == (self.width - 1)))):
             i += 1
-        return i < len(piece.data)
+        return i < len(data)
 
     def is_piece_overlapping_at(self, piece: Piece, x_offset: int, y_offset: int) -> bool:
         """Checks if the given piece overlaps with existing pieces on the board.
@@ -91,13 +91,13 @@ class Board:
         Returns:
             bool: True if there is no overlap.
         """
-        # TODO: Pour un utilisateur lambda, le self.backup ne doit pas être clair
-        # et il ne faut pas oublier de faire une backup avant chaque previsualisation
-        # 0: empty; 6: piece preview
+        # TODO: For a regular developer, `self.backup` might not be clear,
+        # and it's important not to forget to make a backup before each preview.
         i = 0
-        while i < len(piece.data) and self.backup[piece.data[i][1] + y_offset, piece.data[i][0] + x_offset] in [0, 6]:
+        data = piece.data
+        while i < len(data) and self.backup[data[i][1] + y_offset, data[i][0] + x_offset] in [0, 6]: # 0: empty; 6: piece preview
             i += 1
-        return i < len(piece.data)
+        return i < len(data)
 
     def can_place_piece_at(self, piece: Piece, x_offset: int, y_offset: int) -> None:
         """Verifies if the given piece can be placed at the specified coordinates on the board.
@@ -107,8 +107,8 @@ class Board:
 
         Args:
             piece (Piece): Piece to be verified for placement.
-            x_offset (int): Horizontal coordinate where the piece is intended to be placed.
-            y_offset (int): Vertical coordinate where the piece is intended to be placed.
+            x_offset (int): Horizontal offset for placement.
+            y_offset (int): Vertical offset for placement.
 
         Raises:
             NotAdjacentPieceException: When the piece is not adjacent to any other pieces on the board.
@@ -118,9 +118,9 @@ class Board:
         for cell_x, cell_y in piece.iterate_data():
             cell_x += x_offset
             cell_y += y_offset
+
             if cell_x < 0 or cell_y < 0 or cell_x >= self.width or cell_y >= self.height:
                 raise OutOfBoardException()
-
             if self.is_piece_overlapping_at(piece, x_offset, y_offset):
                 raise PieceOverlapException()
 
@@ -129,7 +129,7 @@ class Board:
         bottom_from = lambda tupl: (tupl[1] + 1) + y_offset
         left_from = lambda tupl: (tupl[0] - 1) + x_offset
 
-        # TODO: Améliorer la lisibilité des conditions de detection de coins des pieces.
+        # TODO: Improve the readability of the conditions for detecting the corners of the pieces.
         for top_left in piece.top_left:
             if (top_from(top_left) >= 0 and left_from(top_left) >= 0
                 and self.board[top_from(top_left), left_from(top_left)] == piece.color.value):
@@ -180,7 +180,6 @@ class Board:
             - Empty spaces are represented as blank spaces.
         """
         frame_str = f"{str(Colors.LIGHT_GRAY)}■"
-
         for y in range(-1, self.height + 1):
             line = ""
             for x in range(-1, self.width + 1):

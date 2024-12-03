@@ -24,22 +24,45 @@ class Piece:
                           where each coordinate is a tuple of (x, y).
         """
         self.data = data
+        self.color = Colors.LIGHT_GRAY
         self.bottom_left = []
         self.bottom_right = []
         self.top_left = []
         self.top_right = []
+
         self.__get_extremities()
 
-    def __copy__(self):
+    def __copy__(self) -> "Piece":
         return Piece(self.data)
     
-    def __eq__(self, other):
+    def __eq__(self, other: "Piece") -> bool:
         if isinstance(other, Piece):
             if hasattr(self, 'color') and hasattr(other, 'color'):
                 return (self.color == other.color and 
                         self.data == other.data)
             return self.data == other.data
         return False
+    
+    def __get_extremities(self) -> None:
+        """Identifies and assigns the corners of the data structure."""
+        self.top_left.clear()
+        self.top_right.clear()
+        self.bottom_left.clear()
+        self.bottom_right.clear()
+
+        for cell_x, cell_y in self.iterate_data():
+            if (self.data.count((cell_x - 1, cell_y)) == 0
+                and self.data.count((cell_x, cell_y - 1)) == 0):
+                self.top_left.append((cell_x, cell_y))
+            if (self.data.count((cell_x, cell_y - 1)) == 0
+                and self.data.count((cell_x + 1, cell_y)) == 0):
+                self.top_right.append((cell_x, cell_y))
+            if (self.data.count((cell_x - 1, cell_y)) == 0
+                and self.data.count((cell_x, cell_y + 1)) == 0):
+                self.bottom_left.append((cell_x, cell_y))
+            if (self.data.count((cell_x + 1, cell_y)) == 0
+                and self.data.count((cell_x, cell_y + 1)) == 0):
+                self.bottom_right.append((cell_x, cell_y))
 
     def iterate_data(self) -> Generator[Tuple[int, int], None, None]:
         """Yields the coordinates of each cell in the piece.
@@ -88,24 +111,3 @@ class Piece:
                             y - min(y for _, y in mirrored_piece)) for x, y in mirrored_piece])
         
         self.__get_extremities()
-
-    def __get_extremities(self) -> None:
-        """Identifies and assigns the corners of the data structure."""
-        self.top_left.clear()
-        self.top_right.clear()
-        self.bottom_left.clear()
-        self.bottom_right.clear()
-
-        for cell_x, cell_y in self.iterate_data():
-            if (self.data.count((cell_x - 1, cell_y)) == 0
-                and self.data.count((cell_x, cell_y - 1)) == 0):
-                self.top_left.append((cell_x, cell_y))
-            if (self.data.count((cell_x, cell_y - 1)) == 0
-                and self.data.count((cell_x + 1, cell_y)) == 0):
-                self.top_right.append((cell_x, cell_y))
-            if (self.data.count((cell_x - 1, cell_y)) == 0
-                and self.data.count((cell_x, cell_y + 1)) == 0):
-                self.bottom_left.append((cell_x, cell_y))
-            if (self.data.count((cell_x + 1, cell_y)) == 0
-                and self.data.count((cell_x, cell_y + 1)) == 0):
-                self.bottom_right.append((cell_x, cell_y))
