@@ -3,3 +3,5 @@ from .not_adjacent_piece_exception import NotAdjacentPieceException
 from .piece_overlap_exception import PieceOverlapException
 from .piece_not_in_corner_exception import PieceNotInCornerException
 from .out_of_board_exception import OutOfBoardException
+from .too_much_pieces_in_the_deck_exception import TooMuchPiecesInTheDeckException
+from .not_enough_pieces_in_the_deck_exception import NotEnoughPiecesInTheDeckException
